@@ -98,7 +98,7 @@ class _HomePageState extends State<HomePage> {
             _selectedDate = date;
           });
 
-          debugPrint(_selectedDate.toString());
+          debugPrint("This is selcted date: " + _selectedDate.toString());
         },
       ),
     );
@@ -110,32 +110,36 @@ class _HomePageState extends State<HomePage> {
       return ListView.builder(
         itemCount: _taskController.taskList.length,
         itemBuilder: (_, index) {
-          print(index);
           debugPrint(
-              "The length is" + _taskController.taskList.length.toString());
+              "DB records: " + _taskController.taskList.length.toString());
           Task task = _taskController.taskList[index];
           print(task.toJson());
-          if (task.repeat == "Daily") {
+          //print(task.date);
+
+          //print(DateFormat.yMd().format(DateTime.now()));
+
+          if (task.date == DateFormat.yMd().format(_selectedDate)) {
             print("Find one daily task");
             print(task.title);
-          }
 
-          return AnimationConfiguration.staggeredList(
-              position: index,
-              duration: const Duration(milliseconds: 500),
-              child: SlideAnimation(
-                child: FadeInAnimation(
-                    child: Row(
-                  children: [
-                    GestureDetector(
-                        onTap: () {
-                          debugPrint("Taped");
-                          _showBottomSheet(context, task);
-                        },
-                        child: TaskTitle(task)),
-                  ],
-                )),
-              ));
+            return AnimationConfiguration.staggeredList(
+                position: index,
+                duration: const Duration(milliseconds: 500),
+                child: SlideAnimation(
+                  child: FadeInAnimation(
+                      child: Row(
+                    children: [
+                      GestureDetector(
+                          onTap: () {
+                            _showBottomSheet(context, task);
+                          },
+                          child: TaskTitle(task)),
+                    ],
+                  )),
+                ));
+          } else {
+            return Container();
+          }
         },
       );
     }));
@@ -164,7 +168,6 @@ class _HomePageState extends State<HomePage> {
                   label: "Task Completed",
                   onTap: () {
                     _taskController.markTaskCompleted(task.id!);
-                    debugPrint("Taped Completed");
                     Get.back();
                   },
                   color: Colors.blue,
@@ -173,8 +176,6 @@ class _HomePageState extends State<HomePage> {
               label: "Task Update",
               onTap: () async {
                 await Get.to(() => AddTaskPage(task: task));
-                // _taskController.delete(task);
-                debugPrint("Taped Updated");
                 Get.back();
               },
               color: Colors.red,
@@ -183,7 +184,6 @@ class _HomePageState extends State<HomePage> {
               label: "Task Deleted",
               onTap: () {
                 _taskController.delete(task);
-                debugPrint("Taped Deleted");
                 Get.back();
               },
               color: Colors.red,
@@ -191,7 +191,6 @@ class _HomePageState extends State<HomePage> {
           _bottonSheetButton(
               label: "Cancel",
               onTap: () {
-                debugPrint("Taped cancel");
                 Get.back();
               },
               color: Colors.grey,
@@ -232,9 +231,7 @@ class _HomePageState extends State<HomePage> {
     return AppBar(
       backgroundColor: Colors.white,
       leading: GestureDetector(
-        onTap: () {
-          debugPrint('notification payload: ');
-        },
+        onTap: () {},
         child: Icon(
           color: Colors.black,
           Icons.nightlight_round,

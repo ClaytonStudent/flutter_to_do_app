@@ -13,7 +13,7 @@ import '../models/task.dart';
 
 class AddTaskPage extends StatefulWidget {
   final Task? task;
-  const AddTaskPage({super.key, this.task});
+  AddTaskPage({this.task});
 
   @override
   State<AddTaskPage> createState() => _AddTaskPageState();
@@ -33,6 +33,48 @@ class _AddTaskPageState extends State<AddTaskPage> {
   int _selectedCoplor = 0;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.task != null) {
+      _titleController.text = widget.task!.title!;
+      _noteController.text = widget.task!.note!;
+      _selectedDate = DateFormat.yMd().parse(widget.task!.date!);
+      _startTime = widget.task!.startTime!;
+      _endTime = widget.task!.endTime!;
+      _selectedRemind = widget.task!.remind!;
+      _selectedRepeat = widget.task!.repeat!;
+      _selectedCoplor = widget.task!.color!;
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+/*
+  void _saveTask() {
+    String title = _titleController.text;
+    String description = _descriptionController.text;
+
+    if (widget.task != null) {
+      // Existing task object provided, update the task content
+      widget.task.title = title;
+      widget.task.description = description;
+      // Perform any additional operations for updating the existing task
+    } else {
+      // No task object provided, create a new task
+      Task newTask = Task(title: title, description: description);
+      // Perform any operations for creating a new task
+    }
+
+    // Navigate back to the previous page or perform any necessary actions
+    Navigator.pop(context);
+  }
+*/
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -45,7 +87,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Add Task",
+                widget.task != null ? 'Edit Task' : 'Add Task',
                 style: headingStyle,
               ),
               MyInputField(
@@ -65,7 +107,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   icon: Icon(Icons.calendar_today_outlined),
                   onPressed: () {
                     _getDateFormUser();
-                    debugPrint("Calendar pressed");
                   },
                 ),
               ),
@@ -195,11 +236,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     ],
                   ),
                   MyButton(
-                    label: "Create Task",
+                    label: widget.task != null ? "Update Task" : "Add Task",
                     onTap: () {
                       _validateData();
                     },
-                  ),
+                  )
                 ],
               ),
             ],
@@ -222,12 +263,47 @@ class _AddTaskPageState extends State<AddTaskPage> {
       color: _selectedCoplor,
       isCompleted: 0,
     ));
-    debugPrint("My ID is $value");
+    debugPrint("My Create ID is: $value");
+  }
+
+  _updateTasktoDB() async {
+    int value = await _taskController.updateTask(
+        task: Task(
+      title: _titleController.text,
+      note: _noteController.text,
+      date: DateFormat.yMd().format(_selectedDate),
+      startTime: _startTime,
+      endTime: _endTime,
+      remind: _selectedRemind,
+      repeat: _selectedRepeat,
+      color: _selectedCoplor,
+      isCompleted: 0,
+    ));
+    debugPrint("My Updateed ID is: $value");
   }
 
   _validateData() {
     if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
-      _addTasktoDB();
+      if (widget.task != null) {
+        print("Updating Task");
+        print(widget.task!.title);
+        widget.task!.title = _titleController.text;
+        widget.task!.note = _noteController.text;
+        widget.task!.date = DateFormat.yMd().format(_selectedDate);
+        widget.task!.startTime = _startTime;
+        widget.task!.endTime = _endTime;
+        widget.task!.remind = _selectedRemind;
+        widget.task!.repeat = _selectedRepeat;
+        widget.task!.color = _selectedCoplor;
+        widget.task!.isCompleted = 0;
+
+        print(widget.task!.title);
+        _taskController.updateTask(task: widget.task);
+      } else {
+        print("creating Task");
+        _addTasktoDB();
+      }
+      _taskController.getTasks();
       Get.back();
     } else if (_titleController.text.isEmpty || _noteController.text.isEmpty) {
       Get.snackbar("Required", "All fields are required",
@@ -278,7 +354,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
     var _pickerTime = await _showTimePicker();
     String _formatedTime = _pickerTime.format(context);
     if (_pickerTime == null) {
-      debugPrint("Time Cancelled");
     } else if (isStartTime == true) {
       setState(() {
         _startTime = _formatedTime;

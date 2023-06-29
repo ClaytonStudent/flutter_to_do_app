@@ -53,4 +53,20 @@ class DBHelper {
     return await _db!.rawUpdate(
         '''UPDATE tasks SET isCompleted = ? WHERE id = ?''', [1, id]);
   }
+
+  static updateTask(Task task) async {
+    return await _db!.rawUpdate(
+        '''UPDATE tasks SET title = ?, note = ?, date = ?, startTime = ?, endTime = ?, remind = ?, repeat = ?, color = ? WHERE id = ?''',
+        [
+          task.title,
+          task.note,
+          task.date,
+          task.startTime,
+          task.endTime,
+          task.remind,
+          task.repeat,
+          task.color,
+          task.id
+        ]);
+  }
 }
