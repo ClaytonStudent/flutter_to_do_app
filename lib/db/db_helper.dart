@@ -6,6 +6,7 @@ import '../models/task.dart';
 class DBHelper {
   static Database? _db;
   static final int _version = 1;
+  static final int _newVersion = 2;
   static final String _tableName = 'tasks';
 
   static Future<void> initDB() async {
@@ -15,6 +16,7 @@ class DBHelper {
     try {
       // ignore: no_leading_underscores_for_local_identifiers
       String _path = await getDatabasesPath() + 'tasks.db';
+      print("Updating DB");
       _db = await openDatabase(_path, version: _version,
           onCreate: ((db, version) {
         debugPrint("Create DB");
@@ -68,5 +70,14 @@ class DBHelper {
           task.color,
           task.id
         ]);
+  }
+
+  static Future<dynamic> alterTable() async {
+    print("Altering table Start");
+    var dbClient = await _db;
+    var count = await dbClient?.execute("ALTER TABLE tasks ADD "
+        "COLUMN price DOUBLE;");
+    print("Altering table Done");
+    return count;
   }
 }

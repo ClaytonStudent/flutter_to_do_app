@@ -37,6 +37,7 @@ class MyInputField extends StatelessWidget {
             child: Row(children: [
               Expanded(
                   child: TextFormField(
+                //keyboardType: TextInputType.numberWithOptions(decimal: true),
                 readOnly: widget == null ? false : true,
                 decoration: InputDecoration(
                   hintText: hint,

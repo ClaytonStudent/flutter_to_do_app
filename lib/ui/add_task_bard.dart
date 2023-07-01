@@ -23,14 +23,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
   final TaskController _taskController = Get.put(TaskController());
   TextEditingController _titleController = TextEditingController();
   TextEditingController _noteController = TextEditingController();
+  TextEditingController _priceController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String _endTime = "06:00 PM";
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
   int _selectedRemind = 5;
   List<int> remindList = [5, 10, 15, 20, 25];
-  String _selectedRepeat = "None";
-  List<String> repeatList = ["None", "Daily", "Weekly", "Monthly", "Yearly"];
+  String _selectedRepeat = "OutCome";
+  List<String> repeatList = ["InCome", "OutCome"];
   int _selectedCoplor = 0;
+  double _selectedPrice = 0.0;
 
   @override
   void initState() {
@@ -38,12 +40,14 @@ class _AddTaskPageState extends State<AddTaskPage> {
     if (widget.task != null) {
       _titleController.text = widget.task!.title!;
       _noteController.text = widget.task!.note!;
+      _priceController.text = widget.task!.price.toString();
       _selectedDate = DateFormat.yMd().parse(widget.task!.date!);
       _startTime = widget.task!.startTime!;
       _endTime = widget.task!.endTime!;
       _selectedRemind = widget.task!.remind!;
       _selectedRepeat = widget.task!.repeat!;
       _selectedCoplor = widget.task!.color!;
+      _selectedPrice = widget.task!.price!;
     }
   }
 
@@ -51,29 +55,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
   void dispose() {
     _titleController.dispose();
     _noteController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 
-/*
-  void _saveTask() {
-    String title = _titleController.text;
-    String description = _descriptionController.text;
-
-    if (widget.task != null) {
-      // Existing task object provided, update the task content
-      widget.task.title = title;
-      widget.task.description = description;
-      // Perform any additional operations for updating the existing task
-    } else {
-      // No task object provided, create a new task
-      Task newTask = Task(title: title, description: description);
-      // Perform any operations for creating a new task
-    }
-
-    // Navigate back to the previous page or perform any necessary actions
-    Navigator.pop(context);
-  }
-*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,7 +86,40 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 controller: _noteController,
               ),
               MyInputField(
-                title: "Date",
+                title: "Type",
+                hint: "$_selectedRepeat",
+                widget: DropdownButton(
+                  icon: Icon(Icons.keyboard_arrow_down),
+                  iconSize: 32,
+                  elevation: 4,
+                  underline: Container(
+                    height: 0,
+                  ),
+                  onChanged: (String? value) {
+                    setState(() {
+                      _selectedRepeat = value!;
+                    });
+                  },
+                  items:
+                      repeatList.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value!,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              MyInputField(
+                title: "Price",
+                hint: "Enter price here",
+                controller: _priceController,
+
+                //keyboardType: TextInputType.numberWithOptions(decimal: true),
+              ),
+              MyInputField(
+                title: "Due Date",
                 hint: DateFormat.yMd().format(_selectedDate),
                 widget: IconButton(
                   icon: Icon(Icons.calendar_today_outlined),
@@ -110,7 +128,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   },
                 ),
               ),
-              Row(
+              /* Row(
                 children: [
                   Expanded(
                     child: MyInputField(
@@ -141,6 +159,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   ),
                 ],
               ),
+              
               MyInputField(
                 title: "Remind",
                 hint: "$_selectedRemind minutes early",
@@ -166,32 +185,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   }).toList(),
                 ),
               ),
-              MyInputField(
-                title: "Repeat",
-                hint: "$_selectedRepeat",
-                widget: DropdownButton(
-                  icon: Icon(Icons.keyboard_arrow_down),
-                  iconSize: 32,
-                  elevation: 4,
-                  underline: Container(
-                    height: 0,
-                  ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _selectedRepeat = value!;
-                    });
-                  },
-                  items:
-                      repeatList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value!,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
+*/
+
               SizedBox(
                 height: 10,
               ),
@@ -262,6 +257,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
       repeat: _selectedRepeat,
       color: _selectedCoplor,
       isCompleted: 0,
+      price: _priceController.text.isEmpty
+          ? 0.0
+          : double.parse(_priceController.text),
     ));
     debugPrint("My Create ID is: $value");
   }
@@ -277,13 +275,18 @@ class _AddTaskPageState extends State<AddTaskPage> {
       remind: _selectedRemind,
       repeat: _selectedRepeat,
       color: _selectedCoplor,
+      price: _priceController.text.isEmpty
+          ? 0.0
+          : double.parse(_priceController.text),
       isCompleted: 0,
     ));
     debugPrint("My Updateed ID is: $value");
   }
 
   _validateData() {
-    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
+    if (_titleController.text.isNotEmpty &&
+        _noteController.text.isNotEmpty &&
+        double.tryParse(_priceController.text) != null) {
       if (widget.task != null) {
         print("Updating Task");
         print(widget.task!.title);
@@ -296,6 +299,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
         widget.task!.repeat = _selectedRepeat;
         widget.task!.color = _selectedCoplor;
         widget.task!.isCompleted = 0;
+        widget.task!.price = _priceController.text.isEmpty
+            ? 0.0
+            : double.parse(_priceController.text);
 
         print(widget.task!.title);
         _taskController.updateTask(task: widget.task);
@@ -305,7 +311,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
       }
       _taskController.getTasks();
       Get.back();
-    } else if (_titleController.text.isEmpty || _noteController.text.isEmpty) {
+    } else if (_titleController.text.isEmpty ||
+        _noteController.text.isEmpty ||
+        double.tryParse(_priceController.text) == null) {
       Get.snackbar("Required", "All fields are required",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,

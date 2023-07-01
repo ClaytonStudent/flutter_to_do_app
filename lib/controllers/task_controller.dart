@@ -38,4 +38,9 @@ class TaskController extends GetxController {
     await DBHelper.update(id);
     getTasks();
   }
+
+  void alterTable() async {
+    await DBHelper.alterTable();
+    getTasks();
+  }
 }

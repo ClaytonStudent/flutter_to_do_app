@@ -36,6 +36,13 @@ class _HomePageState extends State<HomePage> {
             height: 10,
           ),
           _showTasks(),
+          /*
+          MyButton(
+              label: "Alter Table",
+              onTap: () async {
+                _taskController.alterTable();
+              }),
+              */
         ],
       ),
     );
@@ -68,8 +75,10 @@ class _HomePageState extends State<HomePage> {
               MyButton(
                   label: "Add Task",
                   onTap: () async {
+                    print("Adding Task");
                     await Get.to(() => AddTaskPage());
                     _taskController.getTasks();
+                    print("Adding task Done");
                   }),
             ],
           ),
@@ -114,10 +123,6 @@ class _HomePageState extends State<HomePage> {
               "DB records: " + _taskController.taskList.length.toString());
           Task task = _taskController.taskList[index];
           print(task.toJson());
-          //print(task.date);
-
-          //print(DateFormat.yMd().format(DateTime.now()));
-
           if (task.date == DateFormat.yMd().format(_selectedDate)) {
             print("Find one daily task");
             print(task.title);
